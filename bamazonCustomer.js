@@ -30,8 +30,8 @@ var inquirer = require("inquirer");
 //MySql Database Connection Setup- Change the host and port as necessary
 var connection = mysql.createConnection({
     host: "localhost",
-    port:3306,
-    
+    port: 3306,
+
     //From .env And keys.js File- Create a .env file using the keys.js formatting if you do not have one
     user: keys.mySQL.user,
     password: keys.mySQL.password,
@@ -45,7 +45,7 @@ var connection = mysql.createConnection({
 //Establish Initial MySQL Database Connection-
 //==============================================
 
-connection.connect(function(err) {
+connection.connect(function (err) {
     if (err) throw err;
 
     //Run the start function to initiate the Main Inquirer Prompt if there is no error
@@ -54,19 +54,32 @@ connection.connect(function(err) {
 
 //MAIN CODE- Inquirer Prompt
 //===================================
+function start() {
 
+    connection.query("select product_name, department_name, price from products WHERE stock_quantity > 0", function (err, res) {
+        if (err) throw err;
+        console.log(res);
+        console.log(typeof res);
+        var productArr = [];
+        res.forEach(function(element) {
+            productArr.push(element.product_name)
+            ;
+        });
+        console.log(productArr);
 
+        inquirer
+            .prompt({
+                name: "choice",
+                type: "list",
+                message: "Welcome to Bamazon.  Select the Item you would like to buy.",
+                choices: productArr
+            })
+            .then(function (answer) {
+                console.log(answer.productList);
+            });
+    });
+};
 
-connection.connect(function (err) {
-    if (err) throw err;
-    console.log("connected as id " + connection.threadId);
- checkConnection();
-
- checkItem();
-
-connection.end();
-
-});
 
 function checkConnection() {
     connection.query("SELECT * FROM products", function (err, res) {
@@ -87,7 +100,7 @@ function checkItem() {
 
 
         console.log(results);
-        console.log(result.forEach(function(element){
+        console.log(result.forEach(function (element) {
             console.log(element.name);
         }));
     });
