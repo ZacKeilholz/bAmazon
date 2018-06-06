@@ -1,3 +1,20 @@
+/*
+Bamazon Manager Prompt: 
+
+Create a new Node application called bamazonManager.js. Running this application will:
+
+
+List a set of menu options:
+View Products for Sale
+View Low Inventory
+Add to Inventory
+Add New Product
+If a manager selects View Products for Sale, the app should list every available item: the item IDs, names, prices, and quantities.
+If a manager selects View Low Inventory, then it should list all items with an inventory count lower than five.
+If a manager selects Add to Inventory, your app should display a prompt that will let the manager "add more" of any item currently in the store.
+If a manager selects Add New Product, it should allow the manager to add a completely new product to the store.
+*/
+
 //Todo List- 
 /*
 -Incorporate .env password file and add to gitignore
@@ -52,51 +69,68 @@ connection.connect(function (err) {
     start();
 })
 
-//MAIN CODE- Inquirer Prompt - Running this application will first display all of the items available for sale. Include the ids, names, and prices of products for sale.
+//MAIN CODE- Inquirer Prompt - Running this application will first display all of the Manager Options
 //===================================
 function start() {
 
-    //Retrieve Up to Date Product Info From SQL Database
-    connection.query("SELECT item_id, product_name, price FROM products WHERE stock_quantity > 0", function (err, res) {
-        if (err) throw err;
-
-        console.log(`Welcome to Bamazon.  Select the Item you would like to buy; Items are sorted by: ID  |  Product Name   |  Price`);
-
-        //Display List of Items for Sale
-        console.log(displayItems(res));
-
-        //Get Product ID and QTTY from User for Items they would like to purchase using Inquirer
-        inquirer.prompt([
+    var question =
+        [
             {
-                type: "input",
-                name: "id",
-                message: "Please Enter the ID of the Product You Would Like to Purchase",
+                type: "list",
+                name: "again",
+                message: "Would you like to purchase something else?",
+                choices: ['View Products For Sale', 'View Low Inventory', 'Add to Inventory', "Add New Product"]
+            }
+        ];
 
-                //Validate the Input
-                validate: function (value) {
-                    if (isNaN(value) || parseInt(value) > res.length || parseInt(value) < 0) {
-                        return "Please Provide a Valid Product ID";
-                    } else {
-                        return true;
-                    }
-                }
-            },
-            {
-                type: "input",
-                name: "qty",
-                message: "How much would you like to purchase?",
-                validate: function (value) {
-                    if (isNaN(value)) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+    inquirer.prompt(question).then(answers => {
+
+    });
+}
+
+
+
+//Retrieve Up to Date Product Info From SQL Database
+connection.query("SELECT item_id, product_name, price FROM products WHERE stock_quantity > 0", function (err, res) {
+    if (err) throw err;
+
+    console.log(`Welcome to Bamazon.  Select the Item you would like to buy; Items are sorted by: ID  |  Product Name   |  Price`);
+
+    //Display List of Items for Sale
+    console.log(displayItems(res));
+
+    //Get Product ID and QTTY from User for Items they would like to purchase using Inquirer
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "id",
+            message: "Please Enter the ID of the Product You Would Like to Purchase",
+
+            //Validate the Input
+            validate: function (value) {
+                if (isNaN(value) || parseInt(value) > res.length || parseInt(value) < 0) {
+                    return "Please Provide a Valid Product ID";
+                } else {
+                    return true;
                 }
             }
-        ]).then(function (answer) {
-            checkAmounts(answer);
-        });
+        },
+        {
+            type: "input",
+            name: "qty",
+            message: "How much would you like to purchase?",
+            validate: function (value) {
+                if (isNaN(value)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+    ]).then(function (answer) {
+        checkAmounts(answer);
     });
+});
 };
 
 
