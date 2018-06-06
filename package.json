@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "console.table": "^0.10.0",
     "dotenv": "^6.0.0",
     "fs": "0.0.1-security",
     "inquirer": "^6.0.0",

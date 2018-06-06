@@ -27,6 +27,9 @@ If a manager selects Add New Product, it should allow the manager to add a compl
 //JS LIBRARIES
 //===================================
 
+//Console Table Module
+const cTable = require('console.table');
+
 //Database Library
 var mysql = require("mysql");
 
@@ -95,7 +98,7 @@ function start() {
                 runQuery("SELECT * FROM products WHERE stock_quantity < 10", printProduct);
 
                 break;
-                
+
             case "Add to Inventory":
                 console.log("Adding to Inventory");
                 runQuery("SELECT * FROM products", updateInventory);
@@ -104,15 +107,74 @@ function start() {
 
             case "Add New Product":
                 console.log("Adding New Product");
-
+                addItem();
                 break;
 
             default:
-
                 break;
         }
     });
 }
+
+function addItem() {
+
+    // Inquirer Prompt asking Manager For Info on Added Item
+    inquirer
+        .prompt([
+            {
+                name: "name",
+                type: "input",
+                message: "What is the name of the product you would like to add?"
+            },
+            {
+                name: "department",
+                type: "input",
+                message: "What category would you like to place your product in?"
+            },
+            {
+                name: "quantity",
+                type: "input",
+                message: "What is the Starting Inventory Quantity?",
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return false;
+                }
+            },
+            {
+                name: "price",
+                type: "input",
+                message: "What is the Starting Price?",
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return false;
+                }
+            },
+        ])
+        .then(function (answer) {
+            // when finished prompting, insert a new item into the products db with that info
+
+            connection.query(
+                "INSERT INTO products SET ?",
+                {
+                    product_name: answer.name,
+                    department_name: answer.department,
+                    price: answer.price,
+                    stock_quantity: answer.quantity
+                },
+                function (err) {
+                    if (err) throw err;
+                    console.log("Your Item was Added successfully!");
+                    // re-prompt the user for if they want to bid or post
+                    start();
+                }
+            );
+        });
+}
+
 
 
 //This function runs after the Query function has run and returned value from the bamazon_db.
@@ -161,8 +223,10 @@ function updateInventory(res) {
             function (err, res) {
                 if (err) throw err;
                 console.log("updated Quantity!");
+
+                runQuery("SELECT * FROM products", printProduct);
+
             });
-        start();
     });
 }
 
@@ -175,60 +239,11 @@ function runQuery(query, callback) {
 };
 
 function printProduct(res) {
-    var arr = [];
-    res.forEach(element => {
-        arr.push(element.item_id + " | " + element.product_name + " | " + element.price + " | " + element.stock_quantity);
-    });
-    console.log(arr);
-
+    console.log("Available Products:")    
+    console.table(res);
     //Restart Mananger Sequence
     start();
 }
-
-
-// //Retrieve Up to Date Product Info From SQL Database
-// connection.query("SELECT item_id, product_name, price FROM products WHERE stock_quantity > 0", function (err, res) {
-//     if (err) throw err;
-
-//     console.log(`Welcome to Bamazon.  Select the Item you would like to buy; Items are sorted by: ID  |  Product Name   |  Price`);
-
-//     //Display List of Items for Sale
-//     console.log(displayItems(res));
-
-//     //Get Product ID and QTTY from User for Items they would like to purchase using Inquirer
-//     inquirer.prompt([
-//         {
-//             type: "input",
-//             name: "id",
-//             message: "Please Enter the ID of the Product You Would Like to Purchase",
-
-//             //Validate the Input
-//             validate: function (value) {
-//                 if (isNaN(value) || parseInt(value) > res.length || parseInt(value) < 0) {
-//                     return "Please Provide a Valid Product ID";
-//                 } else {
-//                     return true;
-//                 }
-//             }
-//         },
-//         {
-//             type: "input",
-//             name: "qty",
-//             message: "How much would you like to purchase?",
-//             validate: function (value) {
-//                 if (isNaN(value)) {
-//                     return false;
-//                 } else {
-//                     return true;
-//                 }
-//             }
-//         }
-//     ]).then(function (answer) {
-//         checkAmounts(answer);
-//     });
-// });
-// };
-
 
 function checkAmounts(value) {
     // Check to see if quantity is available
@@ -313,14 +328,6 @@ function updateSQL(id, quantity) {
     //console.log(query.sql);
 }
 
-//Takes MySQL Result and Displays all items for sale (***USE NPM TABLE TO FORMAT THIS IF THERE IS EXTRA TIME)
-function displayItems(res) {
-    var arr = [];
-    res.forEach(element => {
-        arr.push(element.item_id + " | " + element.product_name + " | " + element.price);
-    });
-    return arr;
-}
 
 
 
