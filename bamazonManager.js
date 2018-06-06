@@ -77,61 +77,157 @@ function start() {
         [
             {
                 type: "list",
-                name: "again",
-                message: "Would you like to purchase something else?",
+                name: "tasks",
+                message: "What managerial task would you like to do?",
                 choices: ['View Products For Sale', 'View Low Inventory', 'Add to Inventory', "Add New Product"]
             }
         ];
 
     inquirer.prompt(question).then(answers => {
+        switch (answers.tasks) {
 
+            case "View Products For Sale":
+                console.log("Viewing All Products for Sale");
+                runQuery("SELECT * FROM products", printProduct);
+                break;
+            case "View Low Inventory":
+                console.log("Viewing Items With Low Inventory (Quantity < 10) ");
+                runQuery("SELECT * FROM products WHERE stock_quantity < 10", printProduct);
+
+                break;
+                
+            case "Add to Inventory":
+                console.log("Adding to Inventory");
+                runQuery("SELECT * FROM products", updateInventory);
+
+                break;
+
+            case "Add New Product":
+                console.log("Adding New Product");
+
+                break;
+
+            default:
+
+                break;
+        }
     });
 }
 
 
+//This function runs after the Query function has run and returned value from the bamazon_db.
+function updateInventory(res) {
+    var queryResult = res;
 
-//Retrieve Up to Date Product Info From SQL Database
-connection.query("SELECT item_id, product_name, price FROM products WHERE stock_quantity > 0", function (err, res) {
-    if (err) throw err;
-
-    console.log(`Welcome to Bamazon.  Select the Item you would like to buy; Items are sorted by: ID  |  Product Name   |  Price`);
-
-    //Display List of Items for Sale
-    console.log(displayItems(res));
-
-    //Get Product ID and QTTY from User for Items they would like to purchase using Inquirer
-    inquirer.prompt([
-        {
-            type: "input",
-            name: "id",
-            message: "Please Enter the ID of the Product You Would Like to Purchase",
-
-            //Validate the Input
-            validate: function (value) {
-                if (isNaN(value) || parseInt(value) > res.length || parseInt(value) < 0) {
-                    return "Please Provide a Valid Product ID";
-                } else {
-                    return true;
+    var question =
+        [
+            {
+                type: "input",
+                name: "id",
+                message: "Which Product ID would you like to add inventory for?",
+                validate: function (value) {
+                    if (isNaN(value) || parseInt(value) > res.length || parseInt(value) < 0) {
+                        return "Not a Valid ID";
+                    } else {
+                        return true;
+                    }
+                }
+            },
+            {
+                type: "input",
+                name: "qty",
+                message: "Please provide an updated stock quantity for this item.",
+                validate: function (value) {
+                    if (isNaN(value)) {
+                        return "Not a Valid Quantity";
+                    } else {
+                        return true;
+                    }
                 }
             }
-        },
-        {
-            type: "input",
-            name: "qty",
-            message: "How much would you like to purchase?",
-            validate: function (value) {
-                if (isNaN(value)) {
-                    return false;
-                } else {
-                    return true;
+        ];
+
+    inquirer.prompt(question).then(answers => {
+
+        var query = connection.query("UPDATE products SET ? WHERE ?",
+            [
+                {
+                    stock_quantity: answers.qty
+                },
+                {
+                    item_id: answers.id
                 }
-            }
-        }
-    ]).then(function (answer) {
-        checkAmounts(answer);
+            ],
+            function (err, res) {
+                if (err) throw err;
+                console.log("updated Quantity!");
+            });
+        start();
     });
-});
+}
+
+
+function runQuery(query, callback) {
+    newQuery = connection.query(query, function (err, res) {
+        if (err) throw err;
+        callback(res);
+    });
 };
+
+function printProduct(res) {
+    var arr = [];
+    res.forEach(element => {
+        arr.push(element.item_id + " | " + element.product_name + " | " + element.price + " | " + element.stock_quantity);
+    });
+    console.log(arr);
+
+    //Restart Mananger Sequence
+    start();
+}
+
+
+// //Retrieve Up to Date Product Info From SQL Database
+// connection.query("SELECT item_id, product_name, price FROM products WHERE stock_quantity > 0", function (err, res) {
+//     if (err) throw err;
+
+//     console.log(`Welcome to Bamazon.  Select the Item you would like to buy; Items are sorted by: ID  |  Product Name   |  Price`);
+
+//     //Display List of Items for Sale
+//     console.log(displayItems(res));
+
+//     //Get Product ID and QTTY from User for Items they would like to purchase using Inquirer
+//     inquirer.prompt([
+//         {
+//             type: "input",
+//             name: "id",
+//             message: "Please Enter the ID of the Product You Would Like to Purchase",
+
+//             //Validate the Input
+//             validate: function (value) {
+//                 if (isNaN(value) || parseInt(value) > res.length || parseInt(value) < 0) {
+//                     return "Please Provide a Valid Product ID";
+//                 } else {
+//                     return true;
+//                 }
+//             }
+//         },
+//         {
+//             type: "input",
+//             name: "qty",
+//             message: "How much would you like to purchase?",
+//             validate: function (value) {
+//                 if (isNaN(value)) {
+//                     return false;
+//                 } else {
+//                     return true;
+//                 }
+//             }
+//         }
+//     ]).then(function (answer) {
+//         checkAmounts(answer);
+//     });
+// });
+// };
 
 
 function checkAmounts(value) {
