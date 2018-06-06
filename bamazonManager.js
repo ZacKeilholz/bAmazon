@@ -82,7 +82,7 @@ function start() {
                 type: "list",
                 name: "tasks",
                 message: "What managerial task would you like to do?",
-                choices: ['View Products For Sale', 'View Low Inventory', 'Add to Inventory', "Add New Product"]
+                choices: ['View Products For Sale', 'View Low Inventory', 'Add to Inventory', "Add New Product", "Exit bamazonManager.js"]
             }
         ];
 
@@ -108,6 +108,13 @@ function start() {
             case "Add New Product":
                 console.log("Adding New Product");
                 addItem();
+                break;
+
+            case "Exit bamazonManager.js":
+                console.log(`
+                \nThank you for Choosing bAmazon.  
+                \nHave a nice day!`);
+                connection.end();
                 break;
 
             default:
@@ -239,7 +246,7 @@ function runQuery(query, callback) {
 };
 
 function printProduct(res) {
-    console.log("Available Products:")    
+    console.log("Available Products:")
     console.table(res);
     //Restart Mananger Sequence
     start();

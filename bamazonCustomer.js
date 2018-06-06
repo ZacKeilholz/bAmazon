@@ -9,6 +9,8 @@
 
 //JS LIBRARIES
 //===================================
+//Console Table Module
+const cTable = require('console.table');
 
 //Database Library
 var mysql = require("mysql");
@@ -63,7 +65,7 @@ function start() {
         console.log(`Welcome to Bamazon.  Select the Item you would like to buy; Items are sorted by: ID  |  Product Name   |  Price`);
 
         //Display List of Items for Sale
-        console.log(displayItems(res));
+        console.table(res);
 
         //Get Product ID and QTTY from User for Items they would like to purchase using Inquirer
         inquirer.prompt([
@@ -158,6 +160,7 @@ function playAgain() {
             console.log(`
             \nThank you for shopping Bamazon!  
             \nGoodbye!`);
+            connection.end();
         }
     });
 }
@@ -183,14 +186,7 @@ function updateSQL(id, quantity) {
     //console.log(query.sql);
 }
 
-//Takes MySQL Result and Displays all items for sale (***USE NPM TABLE TO FORMAT THIS IF THERE IS EXTRA TIME)
-function displayItems(res) {
-    var arr = [];
-    res.forEach(element => {
-        arr.push(element.item_id + " | " + element.product_name + " | " + element.price);
-    });
-    return arr;
-}
+
 
 
 
