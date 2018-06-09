@@ -8,4 +8,4 @@ bAmazon is a command-line app for use as a customer for browsing and purchasing 
 
 ## Function:
 
-To use bAmazon, create a new database using the attached schema file, and create a .env file using everything specified in the keys.js file.  
+To use bAmazon, create a new database using the attached schema file, add data, create a .env file using usernames and passwords specified in the keys.js file and be sure to 'npm i' to download all of the packages used in this project.  .  
