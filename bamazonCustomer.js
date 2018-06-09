@@ -1,11 +1,3 @@
-//Todo List- 
-/*
--Incorporate .env password file and add to gitignore
--Clean up Schema File / Create Seed.sql file
--Add Inquirer 
-
-*/
-
 
 //JS LIBRARIES
 //===================================
@@ -101,6 +93,7 @@ function start() {
     });
 };
 
+//This Function is used to Compare a Value To Stock of All Products in DB
 
 function checkAmounts(value) {
     // Check to see if quantity is available
@@ -137,6 +130,7 @@ function checkAmounts(value) {
         }
     });
 }
+
 
 //Prompt User via Inquirer to Purchase More Items
 function playAgain() {
